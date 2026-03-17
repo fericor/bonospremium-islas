@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+  );
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+    ),
+  );
   runApp(const MyApp());
 }
 
@@ -531,56 +542,19 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (isLoading)
-              const Center(
-                child: CircularProgressIndicator(),
-              ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).dividerColor,
+      backgroundColor: Colors.white,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
             ),
-          ),
-        ),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: canGoBack
-                    ? () {
-                        _controller.goBack();
-                        _updateNavigationState();
-                      }
-                    : null,
-              ),
-              IconButton(
-                icon: const Icon(Icons.arrow_forward),
-                onPressed: canGoForward
-                    ? () {
-                        _controller.goForward();
-                        _updateNavigationState();
-                      }
-                    : null,
-              ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () => _controller.reload(),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
+
     );
   }
 }
