@@ -1,4 +1,4 @@
-package com.example.bonospremium_islas
+package com.bonospremiumgc.myapp
 
 import io.flutter.embedding.android.FlutterActivity
 
