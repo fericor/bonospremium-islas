@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'dart:io' show Platform;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +53,7 @@ class MyApp extends StatelessWidget {
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             touch-action: manipulation;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            /* padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); */
         }
         .background-fix {
             position: fixed;
@@ -193,7 +192,7 @@ class MyApp extends StatelessWidget {
             </div>
         </div>
 
-        <div class="card">
+        <!-- <div class="card">
             <div class="card-header lanzarote">
                 <img src="https://bonospremiumlz.com/wp-content/uploads/2023/05/logo-rojo-nuevo-lanzarote-transparente.png" alt="Lanzarote" class="card-logo">
             </div>
@@ -204,7 +203,7 @@ class MyApp extends StatelessWidget {
                     Acceder a la tienda
                 </button>
             </div>
-        </div>
+        </div> -->
 
         <section class="features">
             <h4 class="features-title">¿Qué encontrarás?</h4>
@@ -253,6 +252,7 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
   bool isLoading = true;
   bool canGoBack = false;
   bool canGoForward = false;
+  bool _primeraCarga = true;
 
   @override
   void initState() {
@@ -264,6 +264,7 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
       ..addJavaScriptChannel(
         'NavegacionApp',
         onMessageReceived: (JavaScriptMessage message) {
+          _primeraCarga = true;
           _cargarUrlConNotch(message.message);
         },
       )
@@ -280,8 +281,10 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
                 url.contains('bonospremiumfv.com') ||
                 url.contains('bonospremiumlz.com');
 
-            // Si navega por tus webs y no lleva el parámetro del notch, frenamos e inyectamos
-            if (esMiTienda && !url.contains('notch=')) {
+            // Solo añadimos el parámetro notch en la primera navegación a la tienda
+            // Para no interferir con las redirecciones internas de WooCommerce (carrito, checkout, etc.)
+            if (esMiTienda && _primeraCarga && !url.contains('notch=')) {
+              _primeraCarga = false;
               _cargarUrlConNotch(url);
               return NavigationDecision.prevent;
             }
@@ -330,18 +333,19 @@ class _HtmlViewerScreenState extends State<HtmlViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      extendBody: true,
-      extendBodyBehindAppBar: true,
-      body: SafeArea(
-        top: false,
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+        top: true,
         bottom: false,
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (isLoading) const Center(child: CircularProgressIndicator()),
-          ],
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Stack(
+            children: [
+              WebViewWidget(controller: _controller),
+              if (isLoading) const Center(child: CircularProgressIndicator()),
+            ],
+          ),
         ),
       ),
     );
